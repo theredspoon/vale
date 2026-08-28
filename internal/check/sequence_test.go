@@ -220,6 +220,113 @@ func TestSequenceMinCountsOccurrences(t *testing.T) {
 	}
 }
 
+// A negated token asserts the absence of something, so it is satisfied at a
+// sentence boundary: "not preceded by X" holds when nothing precedes the match
+// at all. Before this, any leading token -- negated or not -- demanded a word
+// to its left, so such a rule could never fire on a sentence-initial match.
+func TestSequenceNegatedTokenAtBoundary(t *testing.T) {
+	rule, err := NewSequence(testConfig(), baseCheck{
+		"extends":    "sequence",
+		"name":       "Test.NotAfterAnd",
+		"level":      "warning",
+		"ignorecase": true,
+		"message":    "matched",
+		"tokens": []interface{}{
+			map[string]interface{}{"tag": "CC", "negate": true},
+			map[string]interface{}{"pattern": "dogs"},
+			map[string]interface{}{"pattern": "bark"},
+		},
+	}, "Test.NotAfterAnd")
+	if err != nil {
+		t.Fatalf("building rule: %v", err)
+	}
+
+	cases := []struct {
+		name string
+		text string
+		want int
+	}{
+		{"sentence-initial match", "Dogs bark at night.", 1},
+		{"preceded by an allowed word", "Some dogs bark at night.", 1},
+		{"preceded by a conjunction", "Cats meow and dogs bark.", 0},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			f := &core.File{NLP: nlp.Info{}}
+			alerts, rerr := rule.Run(nlp.NewBlock(c.text, c.text, "text"), f, testConfig())
+			if rerr != nil {
+				t.Fatalf("running rule: %v", rerr)
+			}
+			if len(alerts) != c.want {
+				t.Errorf("%q produced %d alerts, want %d", c.text, len(alerts), c.want)
+			}
+		})
+	}
+}
+
+// The same vacuous truth applies on the right: a trailing negated token is
+// satisfied by the end of the sentence, while a trailing required token still
+// needs a word to match.
+func TestSequenceNegatedTokenAtRightBoundary(t *testing.T) {
+	negated, err := NewSequence(testConfig(), baseCheck{
+		"extends":    "sequence",
+		"name":       "Test.NotBeforeNoun",
+		"level":      "warning",
+		"ignorecase": true,
+		"message":    "matched",
+		"tokens": []interface{}{
+			map[string]interface{}{"pattern": "dogs"},
+			map[string]interface{}{"pattern": "bark"},
+			map[string]interface{}{"tag": "IN", "negate": true},
+		},
+	}, "Test.NotBeforeNoun")
+	if err != nil {
+		t.Fatalf("building rule: %v", err)
+	}
+
+	required, err := NewSequence(testConfig(), baseCheck{
+		"extends":    "sequence",
+		"name":       "Test.BeforePreposition",
+		"level":      "warning",
+		"ignorecase": true,
+		"message":    "matched",
+		"tokens": []interface{}{
+			map[string]interface{}{"pattern": "dogs"},
+			map[string]interface{}{"pattern": "bark"},
+			map[string]interface{}{"tag": "IN"},
+		},
+	}, "Test.BeforePreposition")
+	if err != nil {
+		t.Fatalf("building rule: %v", err)
+	}
+
+	cases := []struct {
+		name string
+		rule Sequence
+		text string
+		want int
+	}{
+		{"negated, sentence ends", negated, "Dogs bark", 1},
+		{"negated, followed by a preposition", negated, "Dogs bark at night", 0},
+		{"required, sentence ends", required, "Dogs bark", 0},
+		{"required, followed by a preposition", required, "Dogs bark at night", 1},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			f := &core.File{NLP: nlp.Info{}}
+			alerts, rerr := c.rule.Run(nlp.NewBlock(c.text, c.text, "text"), f, testConfig())
+			if rerr != nil {
+				t.Fatalf("running rule: %v", rerr)
+			}
+			if len(alerts) != c.want {
+				t.Errorf("%q produced %d alerts, want %d", c.text, len(alerts), c.want)
+			}
+		})
+	}
+}
+
 // Without `skip`, `min` means consecutive occurrences.
 func TestSequenceMinConsecutive(t *testing.T) {
 	rule, err := NewSequence(testConfig(), baseCheck{

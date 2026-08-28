@@ -280,6 +280,20 @@ func makeTokens(s *Sequence, generic baseCheck) error {
 	return nil
 }
 
+// negatedToBoundary reports whether every remaining token is negated. A
+// negated token asserts the absence of something, and at the edge of the
+// sentence there is no word at all, so the assertion holds vacuously. This is
+// what lets a rule require "not preceded by X" without also demanding that
+// something precede the match.
+func negatedToBoundary(toks []NLPToken) bool {
+	for _, tok := range toks {
+		if !tok.Negate {
+			return false
+		}
+	}
+	return true
+}
+
 func tokensMatch(token NLPToken, word tag.Token) bool {
 	failedTag := token.tagRe == nil || token.tagRe.MatchStringStd(word.Tag)
 	failedTag = failedTag == token.Negate
@@ -348,6 +362,9 @@ func sequenceMatches(idx int, chk Sequence, target NLPToken, words []tag.Token, 
 				ti, wi := idx-1, jdx-1
 				for ti >= 0 {
 					if wi < 0 {
+						if negatedToBoundary(toks[:ti+1]) {
+							break
+						}
 						return match{index: index, lo: -1, hi: -1}
 					}
 					tok := toks[ti]
@@ -393,6 +410,9 @@ func sequenceMatches(idx int, chk Sequence, target NLPToken, words []tag.Token, 
 				ti, wi := idx, jdx
 				for ti < sizeT {
 					if wi >= sizeW {
+						if negatedToBoundary(toks[ti:]) {
+							break
+						}
 						return match{index: index, lo: -1, hi: -1}
 					}
 					tok := toks[ti]
