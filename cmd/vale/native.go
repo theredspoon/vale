@@ -17,7 +17,7 @@ import (
 )
 
 const nativeHostName = "sh.vale.native"
-const releaseURL = "https://github.com/errata-ai/vale-native/releases/download/%s/vale-native_%s.%s"
+const releaseURL = "https://github.com/vale-cli/vale-native/releases/download/%s/vale-native_%s.%s"
 
 var supportedBrowsers = []string{
 	"chrome",
@@ -210,7 +210,7 @@ func installNativeHostWindows(manifestData []byte, manifestFile, browser string)
 }
 
 func getLatestHostRelease() (string, error) {
-	resp, err := fetchJSON("https://api.github.com/repos/errata-ai/vale-native/releases/latest")
+	resp, err := fetchJSON("https://api.github.com/repos/vale-cli/vale-native/releases/latest")
 	if err != nil {
 		return "", err
 	}
