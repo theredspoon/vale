@@ -90,8 +90,24 @@ type Sequence struct {
 	// Empty means prose's own tagger, which is what every existing rule gets.
 	Model string
 
+	// `exceptions` (`[]string`): Regexes matched against the sentence; a
+	// sequence match that *begins inside* one of their regions is dropped.
+	//
+	// Tokens see the sentence one word at a time, so a guard about a region
+	// -- "the comma closing a fronted phrase is not a list comma" -- is not
+	// expressible as a token. An exception hands that judgment to a regex,
+	// which is the right tool for it, while the tokens keep doing the
+	// part-of-speech work.
+	//
+	// Unlike other checks' `exceptions`, these are not vocabulary terms and
+	// the project's accepted tokens are never merged in.
+	Exceptions []string
+
 	Ignorecase   bool
 	needsTagging bool
+
+	// exceptRe holds the compiled `exceptions`, one per entry.
+	exceptRe []*rx.Regexp
 
 	// filter holds literals the sentence must contain one of. Every token in
 	// the sequence has to match, so any one token's requirement is the whole
@@ -205,10 +221,41 @@ func NewSequence(cfg *core.Config, generic baseCheck, path string) (Sequence, er
 		}
 	}
 
+	for _, pattern := range rule.Exceptions {
+		re, cerr := rx.Compile(pattern)
+		if cerr != nil {
+			return rule, core.NewE201FromPosition(cerr.Error(), path, 1)
+		}
+		rule.exceptRe = append(rule.exceptRe, re)
+	}
+
 	rule.Definition.Scope = sentenceScope(rule.Definition.Scope)
 	rule.filter = rule.literals()
 
 	return rule, nil
+}
+
+// exceptionSpans returns the byte spans of every exception region in txt.
+func (s Sequence) exceptionSpans(txt string) [][]int {
+	var spans [][]int
+	for _, re := range s.exceptRe {
+		for _, loc := range re.FindAllStringIndex(txt, -1) {
+			if lo, hi, ok := runeSpanToBytes(txt, loc[0], loc[1]); ok {
+				spans = append(spans, []int{lo, hi})
+			}
+		}
+	}
+	return spans
+}
+
+// beginsInside reports whether pos falls within any of the given spans.
+func beginsInside(spans [][]int, pos int) bool {
+	for _, span := range spans {
+		if pos >= span[0] && pos < span[1] {
+			return true
+		}
+	}
+	return false
 }
 
 // literals derives the strongest requirement any single token provides.
@@ -606,6 +653,8 @@ func (s Sequence) Run(blk nlp.Block, f *core.File, _ *core.Config) ([]core.Alert
 	positioned := f.NLP.Endpoint == ""
 
 	txt := blk.Text
+	excluded := s.exceptionSpans(txt)
+
 	idx, tok, ok := s.anchor()
 	if ok {
 		{
@@ -623,6 +672,10 @@ func (s Sequence) Run(blk nlp.Block, f *core.File, _ *core.Config) ([]core.Alert
 					if span == nil {
 						// We matched but cannot say where; reporting a bogus
 						// span is worse than reporting nothing.
+						continue
+					}
+
+					if beginsInside(excluded, span[0]) {
 						continue
 					}
 

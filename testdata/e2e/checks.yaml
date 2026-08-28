@@ -239,6 +239,17 @@ cases:
       test.md:3:29:T.R:Sequence matched 'connection'.
       test.md:5:32:T.R:Sequence matched 'connection'.
 
+  - name: sequence-guards
+    about: negated tokens at sentence boundaries, plus region exceptions
+    dir: SequenceGuards
+    args: .
+    exit: 1
+    want: |
+      test.md:1:1:T.List:Missing serial comma.
+      test.md:7:27:T.List:Missing serial comma.
+      test.md:11:10:T.Tail:Bare stop.
+      test.md:13:10:T.Tail:Bare stop.
+
   - name: sequence-blocks
     dir: SequenceScopes
     args: .

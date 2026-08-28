@@ -327,6 +327,51 @@ func TestSequenceNegatedTokenAtRightBoundary(t *testing.T) {
 	}
 }
 
+// An exception marks a region of the sentence, and a sequence match that
+// begins inside it is dropped. Tokens judge one word at a time; a guard like
+// "the comma closing a fronted phrase is not a list comma" is about a region,
+// so it is handed to a regex instead.
+func TestSequenceExceptions(t *testing.T) {
+	rule, err := NewSequence(testConfig(), baseCheck{
+		"extends":    "sequence",
+		"name":       "Test.Excepted",
+		"level":      "warning",
+		"ignorecase": true,
+		"message":    "matched",
+		"exceptions": []interface{}{`^[^,]+,`},
+		"tokens": []interface{}{
+			map[string]interface{}{"pattern": "dogs"},
+			map[string]interface{}{"pattern": "bark"},
+		},
+	}, "Test.Excepted")
+	if err != nil {
+		t.Fatalf("building rule: %v", err)
+	}
+
+	cases := []struct {
+		name string
+		text string
+		want int
+	}{
+		{"match begins inside the region", "Wild dogs bark, cats meow.", 0},
+		{"match begins after the region", "After dark, dogs bark.", 1},
+		{"no region in the sentence", "Wild dogs bark loudly.", 1},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			f := &core.File{NLP: nlp.Info{}}
+			alerts, rerr := rule.Run(nlp.NewBlock(c.text, c.text, "text"), f, testConfig())
+			if rerr != nil {
+				t.Fatalf("running rule: %v", rerr)
+			}
+			if len(alerts) != c.want {
+				t.Errorf("%q produced %d alerts, want %d", c.text, len(alerts), c.want)
+			}
+		})
+	}
+}
+
 // Without `skip`, `min` means consecutive occurrences.
 func TestSequenceMinConsecutive(t *testing.T) {
 	rule, err := NewSequence(testConfig(), baseCheck{
