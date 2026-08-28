@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/errata-ai/vale/v3/internal/testsuite"
+	"github.com/vale-cli/vale/v3/internal/testsuite"
 )
 
 // Colors are used only when the output is a terminal that asked for them.

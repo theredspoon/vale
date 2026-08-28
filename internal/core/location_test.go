@@ -6,7 +6,7 @@ import (
 	"testing"
 	"unicode/utf8"
 
-	"github.com/errata-ai/vale/v3/internal/nlp"
+	"github.com/vale-cli/vale/v3/internal/nlp"
 )
 
 // A punctuation-only match in a block whose text was altered by inline markup

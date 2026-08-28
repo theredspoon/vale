@@ -7,10 +7,10 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/errata-ai/vale/v3/internal/core"
 	"github.com/olekukonko/tablewriter/tw"
 	"github.com/pterm/pterm"
 	"github.com/spf13/pflag"
+	"github.com/vale-cli/vale/v3/internal/core"
 )
 
 var exampleConfig = `MinAlertLevel = suggestion

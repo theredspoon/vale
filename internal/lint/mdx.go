@@ -14,7 +14,7 @@ import (
 	"github.com/yuin/goldmark/text"
 	"github.com/yuin/goldmark/util"
 
-	"github.com/errata-ai/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/core"
 )
 
 // MDX is CommonMark plus ESM statements, JSX elements, and JavaScript

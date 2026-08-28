@@ -9,11 +9,11 @@ import (
 	"github.com/jdkato/prose/v3/tag"
 	"github.com/pterm/pterm"
 
-	"github.com/errata-ai/vale/v3/internal/check"
-	"github.com/errata-ai/vale/v3/internal/core"
-	"github.com/errata-ai/vale/v3/internal/lint"
-	"github.com/errata-ai/vale/v3/internal/nlp"
-	"github.com/errata-ai/vale/v3/internal/system"
+	"github.com/vale-cli/vale/v3/internal/check"
+	"github.com/vale-cli/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/lint"
+	"github.com/vale-cli/vale/v3/internal/nlp"
+	"github.com/vale-cli/vale/v3/internal/system"
 )
 
 // TaggedWord is a word with an NLP context.

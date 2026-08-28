@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/errata-ai/vale/v3/internal/glob"
+	"github.com/vale-cli/vale/v3/internal/glob"
 )
 
 // TestNewFileSectionOrderWins verifies that when multiple config sections

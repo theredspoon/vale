@@ -7,8 +7,8 @@ import (
 
 	"golang.org/x/net/html"
 
-	"github.com/errata-ai/vale/v3/internal/core"
-	"github.com/errata-ai/vale/v3/internal/nlp"
+	"github.com/vale-cli/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/nlp"
 )
 
 // skipTags are tags that we don't want to lint.

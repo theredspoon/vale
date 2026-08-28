@@ -10,7 +10,7 @@ import (
 	"github.com/d5/tengo/v2"
 	"github.com/d5/tengo/v2/stdlib"
 
-	"github.com/errata-ai/vale/v3/internal/nlp"
+	"github.com/vale-cli/vale/v3/internal/nlp"
 )
 
 // compileScript builds a rule's program the way NewScript does, without the

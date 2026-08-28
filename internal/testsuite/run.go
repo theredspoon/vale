@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/errata-ai/vale/v3/internal/core"
-	"github.com/errata-ai/vale/v3/internal/lint"
+	"github.com/vale-cli/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/lint"
 )
 
 // A Result is what running one Case produced.

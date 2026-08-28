@@ -9,8 +9,8 @@ import (
 
 	"github.com/pterm/pterm"
 
-	"github.com/errata-ai/vale/v3/internal/core"
-	"github.com/errata-ai/vale/v3/internal/testsuite"
+	"github.com/vale-cli/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/testsuite"
 )
 
 // errTestFailed reports cases that ran and did not pass.

@@ -5,8 +5,8 @@ import (
 
 	"github.com/jdkato/prose/v3/summarize"
 
-	"github.com/errata-ai/vale/v3/internal/core"
-	"github.com/errata-ai/vale/v3/internal/nlp"
+	"github.com/vale-cli/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/nlp"
 )
 
 // Readability checks the reading grade level of text.

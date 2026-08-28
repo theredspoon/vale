@@ -3,8 +3,8 @@ package code
 import (
 	"regexp"
 
-	"github.com/errata-ai/vale/v3/internal/core"
 	"github.com/smacker/go-tree-sitter/elixir"
+	"github.com/vale-cli/vale/v3/internal/core"
 )
 
 // Elixir extracts `#` comments and the prose held by the `@moduledoc`,

@@ -7,10 +7,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/errata-ai/vale/v3/internal/core"
-	"github.com/errata-ai/vale/v3/internal/glob"
-	"github.com/errata-ai/vale/v3/internal/lint/code"
-	"github.com/errata-ai/vale/v3/internal/nlp"
+	"github.com/vale-cli/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/glob"
+	"github.com/vale-cli/vale/v3/internal/lint/code"
+	"github.com/vale-cli/vale/v3/internal/nlp"
 )
 
 func updateQueries(f *core.File, views map[string]*core.View) ([]core.Scope, error) {

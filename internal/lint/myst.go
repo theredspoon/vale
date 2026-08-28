@@ -12,7 +12,7 @@ import (
 	"github.com/yuin/goldmark/text"
 	"github.com/yuin/goldmark/util"
 
-	"github.com/errata-ai/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/core"
 )
 
 // MyST is CommonMark plus Sphinx-style constructs -- directives, roles,

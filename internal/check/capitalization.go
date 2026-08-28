@@ -1,11 +1,11 @@
 package check
 
 import (
-	rx "github.com/errata-ai/vale/v3/internal/regex"
 	"github.com/jdkato/prose/v3/strcase"
+	rx "github.com/vale-cli/vale/v3/internal/regex"
 
-	"github.com/errata-ai/vale/v3/internal/core"
-	"github.com/errata-ai/vale/v3/internal/nlp"
+	"github.com/vale-cli/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/nlp"
 )
 
 // Capitalization checks the case of a string.

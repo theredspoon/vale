@@ -1,4 +1,4 @@
-PACKAGE_NAME          := github.com/errata-ai/vale/v3
+PACKAGE_NAME          := github.com/vale-cli/vale/v3
 GOLANG_CROSS_VERSION  ?= v0.2.0
 
 SYSROOT_DIR     ?= sysroots
@@ -38,7 +38,7 @@ bench:
 	go test -bench=. -benchmem ./internal/core ./internal/lint ./internal/check
 
 profile:
-	go test -benchmem -run=^$$ -bench ^BenchmarkLintMD$$ github.com/errata-ai/vale/v2/internal/lint -cpuprofile=bin/cpu.out -memprofile=bin/mem.out -trace=bin/trace.out
+	go test -benchmem -run=^$$ -bench ^BenchmarkLintMD$$ github.com/vale-cli/vale/v3/internal/lint -cpuprofile=bin/cpu.out -memprofile=bin/mem.out -trace=bin/trace.out
 	mv lint.test bin
 
 # go install github.com/aclements/go-misc/benchmany@latest

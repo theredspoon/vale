@@ -3,7 +3,7 @@ package lint
 import (
 	"testing"
 
-	"github.com/errata-ai/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/core"
 )
 
 // Both readers of a source file consult skipsComment, so a scope excluded from

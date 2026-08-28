@@ -3,8 +3,8 @@ package code
 import (
 	"regexp"
 
-	"github.com/errata-ai/vale/v3/internal/core"
 	"github.com/smacker/go-tree-sitter/javascript"
+	"github.com/vale-cli/vale/v3/internal/core"
 )
 
 // QML is parsed with the JavaScript grammar: QML's object syntax isn't valid

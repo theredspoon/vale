@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/errata-ai/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/core"
 )
 
 // withFloor forces every block onto one path or the other.

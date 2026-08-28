@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/spf13/pflag"
 
-	"github.com/errata-ai/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/core"
 )
 
 // Flags are the user-defined CLI flags.

@@ -16,7 +16,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/errata-ai/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/core"
 )
 
 // A Case is one document and what linting it must produce.

@@ -13,9 +13,9 @@ import (
 
 	"golang.org/x/exp/maps"
 
-	"github.com/errata-ai/vale/v3/internal/core"
-	"github.com/errata-ai/vale/v3/internal/nlp"
-	"github.com/errata-ai/vale/v3/internal/system"
+	"github.com/vale-cli/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/nlp"
+	"github.com/vale-cli/vale/v3/internal/system"
 )
 
 // Manager controls the loading and validating of the check extension points.

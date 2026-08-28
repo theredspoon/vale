@@ -6,10 +6,10 @@ import (
 	"regexp"
 	"strings"
 
-	rx "github.com/errata-ai/vale/v3/internal/regex"
+	rx "github.com/vale-cli/vale/v3/internal/regex"
 
-	"github.com/errata-ai/vale/v3/internal/core"
-	"github.com/errata-ai/vale/v3/internal/glob"
+	"github.com/vale-cli/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/glob"
 )
 
 var reFrontMatter = regexp.MustCompile(

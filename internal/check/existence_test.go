@@ -3,8 +3,8 @@ package check
 import (
 	"testing"
 
-	"github.com/errata-ai/vale/v3/internal/core"
-	"github.com/errata-ai/vale/v3/internal/nlp"
+	"github.com/vale-cli/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/nlp"
 )
 
 func makeExistence(tokens []string) (*Existence, error) {

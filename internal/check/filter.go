@@ -7,8 +7,8 @@ import (
 
 	"github.com/expr-lang/expr"
 
-	"github.com/errata-ai/vale/v3/internal/core"
-	"github.com/errata-ai/vale/v3/internal/system"
+	"github.com/vale-cli/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/system"
 )
 
 func filter(mgr *Manager) (map[string]Rule, error) {

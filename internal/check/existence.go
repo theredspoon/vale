@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	rx "github.com/errata-ai/vale/v3/internal/regex"
+	rx "github.com/vale-cli/vale/v3/internal/regex"
 
-	"github.com/errata-ai/vale/v3/internal/core"
-	"github.com/errata-ai/vale/v3/internal/nlp"
+	"github.com/vale-cli/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/nlp"
 )
 
 // Existence checks for the present of Tokens.

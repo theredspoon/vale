@@ -6,7 +6,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/errata-ai/vale/v3/internal/nlp"
+	"github.com/vale-cli/vale/v3/internal/nlp"
 )
 
 // isPunctOnly reports whether s contains no letters or digits -- e.g. a bare

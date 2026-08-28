@@ -3,8 +3,8 @@ package code
 import (
 	"regexp"
 
-	"github.com/errata-ai/vale/v3/internal/core"
 	"github.com/smacker/go-tree-sitter/bash"
+	"github.com/vale-cli/vale/v3/internal/core"
 )
 
 // R (and Perl, which shares the normed extension) is parsed with the Bash

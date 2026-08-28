@@ -3,8 +3,8 @@ package check
 import (
 	"unicode/utf8"
 
-	"github.com/errata-ai/vale/v3/internal/core"
-	"github.com/errata-ai/vale/v3/internal/nlp"
+	"github.com/vale-cli/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/nlp"
 )
 
 // anchor converts an alert's block-relative rune span into an absolute byte

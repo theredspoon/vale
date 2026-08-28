@@ -13,7 +13,7 @@ import (
 	"github.com/yuin/goldmark/text"
 	"github.com/yuin/goldmark/util"
 
-	"github.com/errata-ai/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/core"
 )
 
 // Quarto is Pandoc Markdown plus knitr- and Jupyter-style code cells. The

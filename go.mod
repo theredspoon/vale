@@ -1,4 +1,4 @@
-module github.com/errata-ai/vale/v3
+module github.com/vale-cli/vale/v3
 
 go 1.25.7
 

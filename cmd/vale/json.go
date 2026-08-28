@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/errata-ai/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/core"
 )
 
 // PrintJSONAlerts prints Alerts in map[file.path][]Alert form.

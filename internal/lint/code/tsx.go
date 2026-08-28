@@ -3,8 +3,8 @@ package code
 import (
 	"regexp"
 
-	"github.com/errata-ai/vale/v3/internal/core"
 	"github.com/smacker/go-tree-sitter/typescript/tsx"
+	"github.com/vale-cli/vale/v3/internal/core"
 )
 
 func Tsx() *Language {

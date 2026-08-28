@@ -4,7 +4,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/errata-ai/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/core"
 )
 
 // matchCase adapts replacement text to the case of the text it replaces.

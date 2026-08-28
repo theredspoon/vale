@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/errata-ai/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/core"
 )
 
 // QDoc is Qt's documentation markup: LaTeX-style `\commands` inside `/*! ...

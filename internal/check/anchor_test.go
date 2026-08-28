@@ -4,8 +4,8 @@ import (
 	"testing"
 	"unicode/utf8"
 
-	"github.com/errata-ai/vale/v3/internal/core"
-	"github.com/errata-ai/vale/v3/internal/nlp"
+	"github.com/vale-cli/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/nlp"
 )
 
 // runeSpanToBytes underpins every anchored alert; an off-by-one here

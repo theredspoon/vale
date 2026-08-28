@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/errata-ai/vale/v3/internal/core"
-	"github.com/errata-ai/vale/v3/internal/lint/code"
+	"github.com/vale-cli/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/lint/code"
 )
 
 func findLine(s string, line int) string {

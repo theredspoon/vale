@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/errata-ai/vale/v3/internal/core"
-	"github.com/errata-ai/vale/v3/internal/glob"
+	"github.com/vale-cli/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/glob"
 )
 
 func (l *Linter) lintData(f *core.File) error {

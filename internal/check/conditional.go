@@ -3,10 +3,10 @@ package check
 import (
 	"strings"
 
-	rx "github.com/errata-ai/vale/v3/internal/regex"
+	rx "github.com/vale-cli/vale/v3/internal/regex"
 
-	"github.com/errata-ai/vale/v3/internal/core"
-	"github.com/errata-ai/vale/v3/internal/nlp"
+	"github.com/vale-cli/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/nlp"
 )
 
 // Conditional ensures that the present of First ensures the present of Second.

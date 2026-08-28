@@ -4,8 +4,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/errata-ai/vale/v3/internal/core"
-	"github.com/errata-ai/vale/v3/internal/nlp"
+	"github.com/vale-cli/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/nlp"
 )
 
 // Parsed scopes and selectors are cached rather than rebuilt.

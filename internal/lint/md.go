@@ -9,8 +9,8 @@ import (
 	"github.com/yuin/goldmark/extension"
 	grh "github.com/yuin/goldmark/renderer/html"
 
-	"github.com/errata-ai/vale/v3/internal/core"
-	"github.com/errata-ai/vale/v3/internal/nlp"
+	"github.com/vale-cli/vale/v3/internal/core"
+	"github.com/vale-cli/vale/v3/internal/nlp"
 )
 
 // Markdown configuration.

@@ -13,8 +13,8 @@ import (
 	"github.com/jdkato/prose/v3/summarize"
 	"github.com/jdkato/prose/v3/tag"
 
-	"github.com/errata-ai/vale/v3/internal/nlp"
-	"github.com/errata-ai/vale/v3/internal/system"
+	"github.com/vale-cli/vale/v3/internal/nlp"
+	"github.com/vale-cli/vale/v3/internal/system"
 )
 
 var commentControlRE = regexp.MustCompile(`^vale (.+\..+|[^.]+) = (YES|NO|on|off)$`)

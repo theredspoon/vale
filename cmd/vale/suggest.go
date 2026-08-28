@@ -9,7 +9,7 @@ import (
 	"github.com/adrg/strutil/metrics"
 	"github.com/pterm/pterm"
 
-	"github.com/errata-ai/vale/v3/internal/system"
+	"github.com/vale-cli/vale/v3/internal/system"
 )
 
 // maxCommandDistance is how far a word may be from a command and still be

@@ -9,8 +9,8 @@ import (
 
 	"github.com/errata-ai/ini"
 
-	"github.com/errata-ai/vale/v3/internal/glob"
-	"github.com/errata-ai/vale/v3/internal/system"
+	"github.com/vale-cli/vale/v3/internal/glob"
+	"github.com/vale-cli/vale/v3/internal/system"
 )
 
 var pathKeys = []string{
