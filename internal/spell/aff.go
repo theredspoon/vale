@@ -321,7 +321,12 @@ func newDictConfig(file io.Reader) (*dictConfig, error) { //nolint:funlen
 			if len(parts) < 2 {
 				return nil, fmt.Errorf("COMPOUNDMIN stanza had %d fields, expected 2", len(parts))
 			}
-			val, err := strconv.Atoi(parts[1])
+			// Parsed at a fixed width rather than with Atoi, whose `int` is
+			// the target's word size: on a 32-bit build that made the value
+			// where a number stops being representable -- and so the line
+			// between a clamped COMPOUNDMIN and a rejected one -- depend on
+			// the architecture. See #1159.
+			val, err := strconv.ParseInt(parts[1], 10, 64)
 			if err != nil {
 				return nil, fmt.Errorf("COMPOUNDMIN stanza had %q expected number", parts[1])
 			}
@@ -332,7 +337,8 @@ func newDictConfig(file io.Reader) (*dictConfig, error) { //nolint:funlen
 			if val < 1 || val > maxCompoundMin {
 				val = defaultCompoundMin
 			}
-			aff.CompoundMin = val
+			// Safe to narrow: the bounds above are well inside an int.
+			aff.CompoundMin = int(val)
 		case "ONLYINCOMPOUND":
 			if len(parts) < 2 {
 				return nil, fmt.Errorf("ONLYINCOMPOUND stanza had %d fields, expected 2", len(parts))
@@ -342,12 +348,12 @@ func newDictConfig(file io.Reader) (*dictConfig, error) { //nolint:funlen
 			if len(parts) < 2 {
 				return nil, fmt.Errorf("COMPOUNDRULE stanza had %d fields, expected 2", len(parts))
 			}
-			val, err := strconv.Atoi(parts[1])
+			val, err := strconv.ParseInt(parts[1], 10, 64)
 			if err == nil {
 				// A count read from the file, so it only preallocates -- the
 				// slice grows on its own if the count was low, and a wild one
 				// cannot ask for an enormous allocation.
-				aff.CompoundRule = make([]string, 0, min(max(val, 0), maxCompoundRules))
+				aff.CompoundRule = make([]string, 0, int(min(max(val, 0), maxCompoundRules)))
 			} else {
 				aff.CompoundRule = append(aff.CompoundRule, parts[1])
 				for _, flag := range aff.parseFlags(parts[1]) {
