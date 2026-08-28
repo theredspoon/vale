@@ -162,6 +162,12 @@ func (l *Linter) lintHTMLTokens(f *core.File, raw []byte, offset int) error { //
 						masked: done.masked, text: body})
 				}
 			}
+		} else if tokt == html.SelfClosingTagToken && core.StringInSlice(txt, inlineTags) {
+			// `<br/>` separates the words around it just as `<br>` does, but
+			// arrives as its own token type and matched no branch at all --
+			// so `sentence.<br/><br/>This` fused into `sentence.This`.
+			inline = true
+			closedInline = false
 		} else if tokt == html.CommentToken {
 			// A comment, like a closed inline element, is a source-faithful
 			// boundary: trust the next text's own whitespace (#882). Inside a

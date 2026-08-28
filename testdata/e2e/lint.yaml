@@ -1392,3 +1392,34 @@ cases:
       test.go:3:32:T.Marker:'XXX' left in text
       test.py:1:24:T.Marker:'XXX' left in text
       test.py:2:22:T.Marker:'XXX' left in text
+
+  - name: br-separates-text
+    about: "#1157 -- a self-closing `<br/>` arrived as a token type no branch
+      handled, so the text on either side fused: `sentence.<br/><br/>This`
+      read as `sentence.This`, and rules matched across the seam."
+    files:
+      .vale.ini: |
+        StylesPath = styles
+        MinAlertLevel = suggestion
+
+        [*.md]
+        T.Spacing = YES
+      styles/T/Spacing.yml: |
+        extends: existence
+        message: "No space at '%s'."
+        level: error
+        nonword: true
+        tokens:
+          - '[a-z][.?!,][A-Z]'
+      test.md: |
+        A first line.<br/>A second line.
+
+        | Column  | Description |
+        |---------|-------------|
+        | Example | This is the first sentence.<br/><br/>This is the second sentence. |
+
+        A real mistake.Right here.
+    args: test.md
+    exit: 1
+    want: |
+      test.md:7:14:T.Spacing:No space at 'e.R'.
