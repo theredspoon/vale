@@ -178,7 +178,9 @@ func (n *Info) Compute(block *Block, split bool) ([]Block, error) {
 
 	// A remote endpoint's segmentation request can fail -- a network error,
 	// a timeout, a non-2xx status (see post, in http.go) -- and Compute runs
-	// during block construction, ahead of every rule's own Run. There is no
+	// during block construction, ahead of every rule's own Run: a plain
+	// (sentence-scoped) `sequence` rule reaches this exact path just by
+	// being dispatched at all, not only a `max`/`min` one. There is no
 	// recover() anywhere in Vale, so panicking here would crash the whole
 	// run instead of surfacing as this one file's lint error the way
 	// lintProse already reports any other error Compute returns (wrapped in
@@ -188,7 +190,7 @@ func (n *Info) Compute(block *Block, split bool) ([]Block, error) {
 	// Compute's own returned error once doNLP is done calling it, rather
 	// than changing seg's signature for this one caller.
 	var segErr error
-	if n.Endpoint != "" && n.Lang != "en" {
+	if usesRemoteSegmentation(n) {
 		// We only use external segmentation for non-English text since prose
 		// (our native library) is more efficient.
 		seg = func(text string) []string {
@@ -211,6 +213,19 @@ func (n *Info) Compute(block *Block, split bool) ([]Block, error) {
 	}
 
 	return blks, nil
+}
+
+// usesRemoteSegmentation reports whether n should segment sentences via a
+// configured remote endpoint's own `/segment` response rather than local
+// Punkt: only for non-English text, since prose (Vale's native library) is
+// more efficient for English.
+//
+// Both structural paragraph splitting (Compute, above) and a rule's own
+// sentence lookup (File.Sentences, by way of SegmentWith in prose.go) have to
+// make this same choice, so it lives in one place rather than two copies that
+// could drift apart.
+func usesRemoteSegmentation(n *Info) bool {
+	return n != nil && n.Endpoint != "" && n.Lang != "en"
 }
 
 // offsetOf locates piece within blk.Text and returns its offset in blk's
