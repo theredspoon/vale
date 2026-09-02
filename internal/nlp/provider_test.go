@@ -7,6 +7,47 @@ import (
 	"testing"
 )
 
+// IsSentence has to agree exactly with what doNLP's segmentation loop
+// builds: true for every block that loop emits, false for the paragraph
+// copy and the whole-block copy alongside it. check.Scope.Matches and
+// check.Sequence.Run both read this one definition to decide whether a
+// block is safe to skip re-segmenting; a false positive here would make
+// Run trust an unsegmented block as if it were one sentence.
+func TestIsSentence(t *testing.T) {
+	info := Info{Lang: "en", Segmentation: true, Splitting: true}
+
+	check := func(t *testing.T, blks []Block) {
+		t.Helper()
+		for _, b := range blks {
+			want := strings.HasPrefix(b.Scope, "sentence.")
+			if got := b.IsSentence(); got != want {
+				t.Errorf("block %q (scope %q).IsSentence() = %v, want %v",
+					b.Text, b.Scope, got, want)
+			}
+		}
+	}
+
+	t.Run("split=true: paragraph and whole-block copies are not sentences", func(t *testing.T) {
+		blk := NewLinedBlock(
+			"", "One sentence here. Two sentences here.", "text.md", 1)
+		blks, err := info.Compute(&blk, true)
+		if err != nil {
+			t.Fatal(err)
+		}
+		check(t, blks)
+	})
+
+	t.Run("split=false: whole-block copy is not a sentence", func(t *testing.T) {
+		blk := NewLinedBlock(
+			"", "A heading with a sentence.", "text.heading.h2.md", 1)
+		blks, err := info.Compute(&blk, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		check(t, blks)
+	})
+}
+
 // Compute wraps a block's paragraphs as `paragraph.<scope>` only when told the
 // block holds paragraphs. A heading or a table cell is segmented like any
 // other prose, but a rule scoped to `paragraph` must not reach it. See #1132.

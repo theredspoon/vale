@@ -111,6 +111,20 @@ func (b Block) at(offset int) Block {
 	return b
 }
 
+// IsSentence reports whether b is one sentence a segmenter already produced,
+// rather than a block that merely happens to hold exactly one.
+//
+// doNLP's segmentation loop is the only place that builds a `sentence.`-
+// prefixed scope, one per piece of seg(text), so this is a fact about how b
+// was constructed, not an inference about what any rule declared. Scope.Matches
+// reads the same prefix for its own, unrelated reason (a sentence fragment
+// must still satisfy a selector that doesn't ask for one); both go through
+// this one definition so the two readings of "is this a sentence block"
+// cannot drift apart.
+func (b Block) IsSentence() bool {
+	return strings.HasPrefix(b.Scope, "sentence.")
+}
+
 // resolveOffset returns where Text sits within Context.
 //
 // Blocks built from markup are handed a context they were carved out of but

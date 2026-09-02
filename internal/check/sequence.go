@@ -747,19 +747,30 @@ func (s Sequence) Run(blk nlp.Block, f *core.File, _ *core.Config) ([]core.Alert
 		// for tagging or by an earlier rule is not segmented again, since
 		// sentences are read from the file's shared cache.
 		//
-		// A plain rule's own scope is always narrowed to `sentence` (see
-		// sentenceScope), so blk.Text there is already a single sentence and
-		// this segments it right back into exactly one -- a no-op, not a
-		// behavior change. A `max`/`min` rule's declared scope is not
-		// narrowed, so this is what lets it see every sentence of a
-		// paragraph (or whichever block it named) in one Run call.
-		sentences, serr := f.Sentences(blk.Text)
-		if serr != nil {
-			return nil, serr
+		// blk.IsSentence reports a fact about how blk itself was built, not
+		// an inference about what any rule declared -- a plain rule's scope
+		// is *usually* narrowed to `sentence` (see sentenceScope), but that
+		// narrowing depends on sentenceScope's own correctness, and trusting
+		// it unconditionally here would reintroduce exactly the cross-sentence
+		// match this segmentation exists to prevent the moment that narrowing
+		// is ever wrong. Gating on the block's own scope instead means
+		// the call is skipped only when it is truly redundant: re-segmenting
+		// one segmenter's own output, with the same segmenter, can only ever
+		// reproduce that same output. Every other block still gets the real
+		// call, whatever the rule declared.
+		var sentences []segment.Sentence
+		if !blk.IsSentence() {
+			var serr error
+			sentences, serr = f.Sentences(blk.Text)
+			if serr != nil {
+				return nil, serr
+			}
 		}
 		if len(sentences) == 0 {
 			// An empty or otherwise unsegmentable block still has to be
-			// walked as itself, not skipped outright.
+			// walked as itself, not skipped outright. Also the fast path for
+			// a block already known to be one sentence: re-deriving that
+			// from f.Sentences would just return the same single piece.
 			sentences = []segment.Sentence{{Text: blk.Text, Start: 0}}
 		}
 

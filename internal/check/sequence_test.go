@@ -903,6 +903,219 @@ func TestSequenceParagraphScopeMatchesParagraphSentences(t *testing.T) {
 	}
 }
 
+// This is the invariant every other test here assumes rather than checks:
+// whatever a `sequence` rule declares, every block Scope.Matches ever hands
+// it is one sentence a segmenter already produced. Stated once, over the
+// whole scope grammar, instead of pinned indirectly by whichever declared
+// scopes happen to have their own test.
+func TestScopeMatchesOnlyHandsSequenceSentenceBlocks(t *testing.T) {
+	declaredScopes := [][]string{
+		nil,
+		{"paragraph"},
+		{"heading"},
+		{"text"},
+		{"sentence"},
+		{"sentence.list"},
+		{"~list"},
+		{"~code"},
+		{"~list", "text"},
+		{"heading", "~heading.h1"},
+	}
+
+	text := "One sentence here. Two sentences here, for good measure."
+
+	for _, declared := range declaredScopes {
+		t.Run(strings.Join(declared, "&"), func(t *testing.T) {
+			rule, err := NewSequence(testConfig(), baseCheck{
+				"extends": "sequence",
+				"name":    "Test.ScopeGrammar",
+				"level":   "error",
+				"message": "matched",
+				"scope":   declared,
+				"tokens": []interface{}{
+					map[string]interface{}{"pattern": "sentence"},
+				},
+			}, "Test.ScopeGrammar")
+			if err != nil {
+				t.Fatalf("building rule: %v", err)
+			}
+
+			f := &core.File{NLP: nlp.Info{Segmentation: true, Splitting: true}}
+			paragraph := nlp.NewLinedBlock("", text, "text.md", 1)
+
+			blocks, cerr := f.NLP.Compute(&paragraph, true)
+			if cerr != nil {
+				t.Fatalf("computing blocks: %v", cerr)
+			}
+
+			// Not every declared scope matches a block this flat
+			// paragraph builds (there is no heading or list block here) --
+			// that is fine. The invariant under test is narrower and holds
+			// regardless: whatever Scope.Matches does hand back, it is
+			// always a sentence block.
+			scope := NewScope(rule.Fields().Scope)
+			for _, blk := range blocks {
+				if !scope.Matches(blk) {
+					continue
+				}
+				if !blk.IsSentence() {
+					t.Errorf("scope %v matched block %q (scope %q), which is not a sentence block",
+						declared, blk.Text, blk.Scope)
+				}
+			}
+		})
+	}
+}
+
+// A negated-scope plain rule (`scope: ~list`) must still reject a
+// cross-sentence match under real dispatch, with this optimization active.
+//
+// This does not actually discriminate blk.IsSentence's gating from the old
+// unconditional f.Sentences call: sentenceScope correctly narrows `~list` to
+// `sentence&~list`, so by the time Scope.Matches ever hands Run a block for
+// this rule, that block is always sentence-scoped -- IsSentence() is true,
+// and skipping f.Sentences on a genuine single sentence returns the same
+// single sentence back that a real call would have. Reverting only the gate
+// leaves this test passing, confirmed directly. What it does verify, and is
+// worth keeping for, is that sentenceScope's narrowing and Run's gating
+// compose correctly for the scenario each was written against: one at the
+// dispatch layer, one inside Run. A future change to either that broke that
+// composition would fail here even though neither one's own tests would
+// necessarily catch it in isolation.
+func TestSequenceRoundTripSkipDoesNotReintroduceNegatedScopeFalsePositive(t *testing.T) {
+	rule, err := NewSequence(testConfig(), baseCheck{
+		"extends":    "sequence",
+		"name":       "Test.WidgetArrivedNegatedScopeRoundTrip",
+		"level":      "error",
+		"ignorecase": true,
+		"message":    "matched",
+		"scope":      []string{"~list"},
+		"tokens": []interface{}{
+			map[string]interface{}{"pattern": "widget"},
+			map[string]interface{}{"pattern": "arrived", "skip": 1},
+		},
+	}, "Test.WidgetArrivedNegatedScopeRoundTrip")
+	if err != nil {
+		t.Fatalf("building rule: %v", err)
+	}
+
+	text := "I bought a widget. Arrived promptly, said the courier."
+	alerts := runScoped(t, rule, text)
+	if len(alerts) != 0 {
+		t.Errorf("produced %d alerts, want 0 (match spans two sentences)", len(alerts))
+	}
+}
+
+// This is the actual round-trip saving this optimization exists for, proven
+// by counting real requests rather than asserting it indirectly: a plain
+// (sentence-scoped) rule dispatched through the real pipeline over a
+// multi-sentence paragraph must not add any /segment call of its own beyond
+// the one Info.Compute already made to build the blocks in the first place.
+//
+// This also has to prove the optimization does not silently break ordinary
+// matching in the process: the rule's genuine match lives entirely within
+// the first dispatched sentence, so if skipping f.Sentences on a
+// blk.IsSentence() block ever handed matchesIn something other than that
+// exact sentence's own text, the match would stop resolving and this test
+// would catch that as a wrong alert count, not just a wrong call count.
+//
+// Verified against the actual pre-fix behavior, not just asserted: before
+// this change, this same scenario made 2 total /segment calls (1 from
+// Compute, 1 more from the sentence block whose text still contains the
+// rule's required literal -- the other dispatched sentence lacks that
+// literal and exits before ever reaching f.Sentences, via the unrelated
+// early-exit optimization above; a rule without a usable literal prefilter
+// would pay one extra call per dispatched sentence instead of one).
+// TokenCache.Sentences' cache did not prevent this. It is keyed by exact
+// text. Each sentence's text differs from the paragraph's, and from each
+// other's, so each one was a real, first-time cache miss.
+func TestSequencePlainRuleAddsNoSegmentCallsBeyondCompute(t *testing.T) {
+	rule, err := NewSequence(testConfig(), baseCheck{
+		"extends":    "sequence",
+		"name":       "Test.WidgetArrivedNoExtraCalls",
+		"level":      "error",
+		"ignorecase": true,
+		"message":    "matched",
+		"tokens": []interface{}{
+			map[string]interface{}{"pattern": "widget"},
+			map[string]interface{}{"pattern": "arrived", "skip": 1},
+		},
+	}, "Test.WidgetArrivedNoExtraCalls")
+	if err != nil {
+		t.Fatalf("building rule: %v", err)
+	}
+
+	var segmentCalls int
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/segment":
+			segmentCalls++
+			text := r.URL.Query().Get("text")
+			result := nlp.SegmentResult{Sents: strings.Split(text, ". ")}
+			if encErr := json.NewEncoder(w).Encode(result); encErr != nil {
+				t.Errorf("encoding mock /segment response: %v", encErr)
+			}
+		case "/tag":
+			local, terr := nlp.TextToTokens(r.URL.Query().Get("text"), nil)
+			if terr != nil {
+				t.Errorf("tagging mock request text: %v", terr)
+				return
+			}
+			remote := make([]tag.Token, len(local))
+			for i, tok := range local {
+				remote[i] = tag.Token{Text: tok.Text, Tag: tok.Tag, Start: 0}
+			}
+			if encErr := json.NewEncoder(w).Encode(nlp.TagResult{Tokens: remote}); encErr != nil {
+				t.Errorf("encoding mock /tag response: %v", encErr)
+			}
+		default:
+			t.Errorf("unexpected request path: %s", r.URL.Path)
+		}
+	}))
+	defer server.Close()
+
+	text := "I bought a widget that arrived promptly. It shipped yesterday."
+	f := &core.File{NLP: nlp.Info{
+		Segmentation: true, Splitting: true, Endpoint: server.URL, Lang: "id",
+	}}
+	paragraph := nlp.NewLinedBlock("", text, "text.md", 1)
+
+	blocks, cerr := f.NLP.Compute(&paragraph, true)
+	if cerr != nil {
+		t.Fatalf("computing blocks: %v", cerr)
+	}
+	if segmentCalls != 1 {
+		t.Fatalf("test setup: Info.Compute itself made %d /segment calls, want 1", segmentCalls)
+	}
+
+	scope := NewScope(rule.Fields().Scope)
+	dispatched := 0
+	var alerts []core.Alert
+	for _, blk := range blocks {
+		if !scope.Matches(blk) {
+			continue
+		}
+		dispatched++
+		got, rerr := rule.Run(blk, f, testConfig())
+		if rerr != nil {
+			t.Fatalf("running rule: %v", rerr)
+		}
+		alerts = append(alerts, got...)
+	}
+	if dispatched != 2 {
+		t.Fatalf("test setup: rule dispatched into %d blocks, want 2 (one per sentence)", dispatched)
+	}
+	if len(alerts) != 1 {
+		t.Errorf("produced %d alerts, want exactly 1 (the genuine match in the first sentence "+
+			"must still resolve correctly under the gated path)", len(alerts))
+	}
+
+	if segmentCalls != 1 {
+		t.Errorf("total /segment calls = %d, want 1 (Run must add none beyond Compute's own)",
+			segmentCalls)
+	}
+}
+
 // A token found inside its `skip` window satisfies that window alone: the
 // tokens after it still have to hold. This rule once fired on any "the ...
 // noun" tail, whether or not a past-tense verb followed.
